@@ -1,0 +1,35 @@
+[package]
+name = "binate"
+version = "0.0.1"
+authors = ["Aaron Taner <mapkts@gmail.com>"]
+description = "WIP"
+license = "MIT OR Apache-2.0"
+documentation = "https://docs.rs/binate"
+homepage = "https://github.com/mapkts/binate"
+repository = "https://github.com/mapkts/binate"
+readme = "README.md"
+edition = "2018"
+
+[features]
+# Features that enabled by default
+default = []
+
+# Include all features
+full = ["frame"]
+
+frame = []
+
+[dependencies]
+bitflags = "1.2"
+bytes = "1"
+tokio = { version = "1.8", features = [] }
+tokio-stream = "0.1.6"
+dashmap = "4.0.2"
+
+[target.'cfg(loom)'.dependencies]
+loom = "0.5"
+
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
