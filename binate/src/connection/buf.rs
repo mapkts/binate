@@ -2,7 +2,8 @@ use std::collections::VecDeque;
 use std::convert::TryInto;
 use std::io::IoSlice;
 
-use super::super::frame::{DecodeError, Frame, Payload};
+use crate::frame::{DecodeError, Frame};
+use crate::payload::Payload;
 use bytes::{Buf, BufMut, Bytes, BytesMut};
 
 /// A specialized buf list for frame reassembly.

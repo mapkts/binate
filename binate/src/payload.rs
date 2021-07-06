@@ -2,7 +2,7 @@
 //!
 //! Payload can be distinguished into two types: `Data` and `Metadata`. The distinction between
 //! the types in an application is left to the application.
-use super::Encode;
+use crate::frame::Encode;
 use bytes::{Buf, BufMut, Bytes, BytesMut};
 
 /// The data field of a `Payload`.
@@ -110,7 +110,7 @@ impl Payload {
     }
 }
 
-/// Construct a [`Payload`] with optional [`Data`] and/or [`Metadata`].
+/// Construct a `Payload` with optional `Data` and/or `Metadata`.
 ///
 /// # Examples
 ///

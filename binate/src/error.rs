@@ -14,7 +14,7 @@ pub struct Error {
     inner: Box<ErrorImpl>,
 }
 
-type Source = Box<dyn Send + Sync + StdError>;
+type Source = Box<dyn StdError + Send + Sync>;
 
 struct ErrorImpl {
     kind: Kind,

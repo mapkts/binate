@@ -34,14 +34,14 @@ use std::time::Duration;
 /// ```
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SetupFrame {
-    flags: Flags,
-    version: Version,
-    keepalive: u32,
-    lifetime: u32,
-    resume_token: Option<Bytes>,
-    metadata_mimetype: Bytes,
-    data_mimetype: Bytes,
-    payload: Payload,
+    pub(crate) flags: Flags,
+    pub(crate) version: Version,
+    pub(crate) keepalive: u32,
+    pub(crate) lifetime: u32,
+    pub(crate) resume_token: Option<Bytes>,
+    pub(crate) metadata_mimetype: Bytes,
+    pub(crate) data_mimetype: Bytes,
+    pub(crate) payload: Payload,
 }
 
 impl SetupFrame {
@@ -235,7 +235,7 @@ impl Default for SetupFrameBuilder {
         SetupFrameBuilder {
             flags: Flags::empty(),
             version: Version::default(),
-            keepalive: 45_000,
+            keepalive: 20_000,
             lifetime: 90_000,
             resume_token: None,
             metadata_mimetype: Bytes::from(DEFAULT_MIMETYPE),

@@ -5,7 +5,6 @@ pub mod codec;
 mod decode;
 mod encode;
 mod flags;
-mod payload;
 mod u24;
 mod version;
 mod visit;
@@ -13,12 +12,10 @@ mod visit;
 pub use self::decode::{Decode, DecodeError};
 pub use self::encode::Encode;
 pub use self::flags::{Flags, FrameType};
-pub use self::payload::{
-    Data, Metadata, Payload, PayloadBuilder, PayloadChunks,
-};
 pub use self::u24::U24;
 pub use self::version::Version;
 
+use crate::payload::Payload;
 use bytes::{Buf, BytesMut};
 use codec::*;
 use visit::*;
