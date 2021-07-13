@@ -5,7 +5,7 @@ use bytes::{Buf, BufMut, BytesMut};
 ///
 /// # Frame Contents
 ///
-/// The general format for a Resume OK frame is given below.
+/// The resume_ok frame is structured as follows:
 ///
 /// ```text
 ///  0                   1                   2                   3

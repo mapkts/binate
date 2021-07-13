@@ -5,7 +5,7 @@ use bytes::{Buf, BufMut, Bytes, BytesMut};
 ///
 /// # Frame Contents
 ///
-/// The general format for a Resume frame is given below.
+/// The resume frame is structured as follows:
 ///
 /// ```text
 ///  0                   1                   2                   3

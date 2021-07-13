@@ -5,6 +5,8 @@ use bytes::{Buf, BufMut, Bytes, BytesMut};
 ///
 /// # Frame Contents
 ///
+/// The request_stream frame is structured as follows:
+///
 /// ```text
 ///  0                   1                   2                   3
 ///  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
