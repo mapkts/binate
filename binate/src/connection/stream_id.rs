@@ -12,23 +12,23 @@ const STREAM_ID_MASK: i32 = 0x7FFFFFFF;
 
 /// Thread safe stream ID provider.
 #[derive(Debug)]
-pub struct StreamIdSupplier(AtomicI32);
+pub struct StreamIdProvider(AtomicI32);
 
-impl StreamIdSupplier {
-    /// Create a `StreamIdSupplier` for the client side.
-    pub fn new_for_client() -> StreamIdSupplier {
+impl StreamIdProvider {
+    /// Create a client-side `StreamIdProvider`.
+    pub fn new_for_client() -> StreamIdProvider {
         let sid = AtomicI32::new(1);
-        StreamIdSupplier(sid)
+        StreamIdProvider(sid)
     }
 
-    /// Create a `StreamIdSupplier` for the server side.
-    pub fn new_for_server() -> StreamIdSupplier {
+    /// Create a server-side `StreamIdProvider`.
+    pub fn new_for_server() -> StreamIdProvider {
         let sid = AtomicI32::new(2);
-        StreamIdSupplier(sid)
+        StreamIdProvider(sid)
     }
 
     /// Returns the next available stream ID.
-    pub fn next<T>(&self, store: &DashMap<u32, T>) -> u32 {
+    pub fn next_stream_id<T>(&self, store: &DashMap<u32, T>) -> u32 {
         let mut sid;
         loop {
             sid = (self.0.fetch_add(2, Ordering::Relaxed) & STREAM_ID_MASK)
@@ -42,9 +42,9 @@ impl StreamIdSupplier {
     }
 
     // for testing only
-    fn _new(init: i32) -> StreamIdSupplier {
+    fn _new(init: i32) -> StreamIdProvider {
         let sid = AtomicI32::new(init);
-        StreamIdSupplier(sid)
+        StreamIdProvider(sid)
     }
 }
 
@@ -57,46 +57,46 @@ mod tests {
 
     #[test]
     fn assert_send_sync() {
-        assert_send::<StreamIdSupplier>();
-        assert_sync::<StreamIdSupplier>();
+        assert_send::<StreamIdProvider>();
+        assert_sync::<StreamIdProvider>();
     }
 
     #[test]
     fn first_client_stream_id() {
         let store: DashMap<u32, ()> = DashMap::new();
-        let gen = StreamIdSupplier::new_for_client();
-        assert_eq!(gen.next(&store), 1);
-        assert_eq!(gen.next(&store), 3);
+        let gen = StreamIdProvider::new_for_client();
+        assert_eq!(gen.next_stream_id(&store), 1);
+        assert_eq!(gen.next_stream_id(&store), 3);
     }
 
     #[test]
     fn first_server_stream_id() {
         let store: DashMap<u32, ()> = DashMap::new();
-        let gen = StreamIdSupplier::new_for_server();
-        assert_eq!(gen.next(&store), 2);
-        assert_eq!(gen.next(&store), 4);
+        let gen = StreamIdProvider::new_for_server();
+        assert_eq!(gen.next_stream_id(&store), 2);
+        assert_eq!(gen.next_stream_id(&store), 4);
     }
 
     #[test]
     fn skip_existing_one() {
         let store: DashMap<u32, ()> = DashMap::new();
         store.insert(3, ());
-        let gen = StreamIdSupplier::new_for_client();
-        assert_eq!(gen.next(&store), 1);
-        assert_eq!(gen.next(&store), 5);
+        let gen = StreamIdProvider::new_for_client();
+        assert_eq!(gen.next_stream_id(&store), 1);
+        assert_eq!(gen.next_stream_id(&store), 5);
     }
 
     #[test]
     fn wraps_around_on_overflow() {
         let store: DashMap<u32, ()> = DashMap::new();
-        let gen = StreamIdSupplier::_new(i32::MAX);
-        assert_eq!(gen.next(&store), STREAM_ID_MASK as u32);
-        assert_eq!(gen.next(&store), 1);
+        let gen = StreamIdProvider::_new(i32::MAX);
+        assert_eq!(gen.next_stream_id(&store), STREAM_ID_MASK as u32);
+        assert_eq!(gen.next_stream_id(&store), 1);
 
         let store: DashMap<u32, ()> = DashMap::new();
-        let gen = StreamIdSupplier::_new(-1);
-        assert_eq!(gen.next(&store), STREAM_ID_MASK as u32);
-        assert_eq!(gen.next(&store), 1);
+        let gen = StreamIdProvider::_new(-1);
+        assert_eq!(gen.next_stream_id(&store), STREAM_ID_MASK as u32);
+        assert_eq!(gen.next_stream_id(&store), 1);
     }
 }
 
@@ -108,7 +108,7 @@ mod tests {
     #[test]
     fn assert_thread_safe() {
         loom::model(|| {
-            let gen = Arc::new(StreamIdSupplier::new_for_server());
+            let gen = Arc::new(StreamIdProvider::new_for_server());
             let store: Arc<DashMap<u32, ()>> = Arc::new(DashMap::new());
             store.insert(4, ());
             store.insert(8, ());
@@ -118,20 +118,20 @@ mod tests {
                     let gen = gen.clone();
                     let store = store.clone();
                     loom::thread::spawn(move || {
-                        gen.next(&store);
+                        gen.next_stream_id(&store);
                     })
                 })
                 .collect();
 
-            gen.next(&store);
-            gen.next(&store);
+            gen.next_stream_id(&store);
+            gen.next_stream_id(&store);
 
             for th in threads {
                 th.join().unwrap()
             }
 
             // (2 + 2 + 2 + 1) * 2
-            assert_eq!(gen.next(&store), 14);
+            assert_eq!(gen.next_stream_id(&store), 14);
         })
     }
 }
