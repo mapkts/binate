@@ -2,6 +2,7 @@ use super::*;
 use crate::prelude::DEFAULT_MIMETYPE;
 use bytes::{Buf, BufMut, Bytes, BytesMut};
 use std::time::Duration;
+use crate::consts::{DEFAULT_KEEPALIVE_INTERVAL, DEFAULT_KEEPALIVE_TIMEOUT};
 
 /// The setup frame.
 ///
@@ -38,8 +39,8 @@ use std::time::Duration;
 pub struct SetupFrame {
     pub(crate) flags: Flags,
     pub(crate) version: Version,
-    pub(crate) keepalive: u32,
-    pub(crate) lifetime: u32,
+    pub(crate) keepalive_interval: u32,
+    pub(crate) keepalive_timeout: u32,
     pub(crate) resume_token: Option<Bytes>,
     pub(crate) metadata_mimetype: Bytes,
     pub(crate) data_mimetype: Bytes,
@@ -74,14 +75,14 @@ impl SetupFrame {
     }
 
     /// Returns the time between KEEPALIVE frames that the client will send.
-    pub fn keepalive(&self) -> Duration {
-        Duration::from_millis(self.keepalive as u64)
+    pub fn keepalive_interval(&self) -> Duration {
+        Duration::from_millis(self.keepalive_interval as u64)
     }
 
     /// Returns the time that a client will allow a server to not respond to
     /// a KEEPALIVE before it is assumed to be dead.
-    pub fn lifetime(&self) -> Duration {
-        Duration::from_millis(self.lifetime as u64)
+    pub fn keepalive_timeout(&self) -> Duration {
+        Duration::from_millis(self.keepalive_timeout as u64)
     }
 
     /// Returns the resume identification token (not present if the RESUME bit is not set).
@@ -142,8 +143,8 @@ impl Encode for SetupFrame {
         buf.put_u32(SetupFrame::STREAM_ID);
         buf.put_u16(FrameType::SETUP.bits() | self.flags.bits());
         self.version.encode(buf);
-        buf.put_u32(self.keepalive);
-        buf.put_u32(self.lifetime);
+        buf.put_u32(self.keepalive_interval);
+        buf.put_u32(self.keepalive_timeout);
         if let Some(token) = &self.resume_token {
             buf.put_u16(token.len() as u16);
             buf.put_slice(token);
@@ -209,8 +210,8 @@ impl Decode for SetupFrame {
         Ok(SetupFrame {
             flags,
             version,
-            keepalive,
-            lifetime,
+            keepalive_interval: keepalive,
+            keepalive_timeout: lifetime,
             resume_token,
             metadata_mimetype,
             data_mimetype,
@@ -224,8 +225,8 @@ impl Decode for SetupFrame {
 pub struct SetupFrameBuilder {
     flags: Flags,
     version: Version,
-    keepalive: u32,
-    lifetime: u32,
+    keepalive_interval: u32,
+    keepalive_timeout: u32,
     resume_token: Option<Bytes>,
     metadata_mimetype: Bytes,
     data_mimetype: Bytes,
@@ -237,8 +238,8 @@ impl Default for SetupFrameBuilder {
         SetupFrameBuilder {
             flags: Flags::empty(),
             version: Version::default(),
-            keepalive: 20_000,
-            lifetime: 90_000,
+            keepalive_interval: DEFAULT_KEEPALIVE_INTERVAL.as_millis() as u32,
+            keepalive_timeout: DEFAULT_KEEPALIVE_TIMEOUT.as_millis() as u32,
             resume_token: None,
             metadata_mimetype: Bytes::from(DEFAULT_MIMETYPE),
             data_mimetype: Bytes::from(DEFAULT_MIMETYPE),
@@ -274,17 +275,17 @@ impl SetupFrameBuilder {
     ///
     /// - For mobile-to-server connections, the time interval between client KEEPALIVE frames is
     /// often > 30,000ms.
-    pub fn set_keepalive(mut self, keepalive: u32) -> Self {
-        debug_assert_max_u31!(keepalive);
-        self.keepalive = keepalive & MAX_U31;
+    pub fn set_keepalive_interval(mut self, interval: u32) -> Self {
+        debug_assert_max_u31!(interval);
+        self.keepalive_interval = interval & MAX_U31;
         self
     }
 
     /// Sets the time (in milliseconds) that a client will allow a server to not respond to a
     /// KEEPALIVE before it is assumed to be dead. This value MUST be > 0 and <= [`MAX_U31`].
-    pub fn set_lifetime(mut self, lifetime: u32) -> Self {
-        debug_assert_max_u31!(lifetime);
-        self.lifetime = lifetime & MAX_U31;
+    pub fn set_keepalive_timeout(mut self, timeout: u32) -> Self {
+        debug_assert_max_u31!(timeout);
+        self.keepalive_timeout = timeout & MAX_U31;
         self
     }
 
@@ -360,8 +361,8 @@ impl SetupFrameBuilder {
         SetupFrame {
             flags: self.flags,
             version: self.version,
-            keepalive: self.keepalive,
-            lifetime: self.lifetime,
+            keepalive_interval: self.keepalive_interval,
+            keepalive_timeout: self.keepalive_timeout,
             resume_token: self.resume_token,
             metadata_mimetype: self.metadata_mimetype,
             data_mimetype: self.data_mimetype,
@@ -383,8 +384,8 @@ mod tests {
     fn test_codec() {
         let setup = SetupFrame::builder()
             .set_version(1, 0)
-            .set_keepalive(1000)
-            .set_lifetime(2000)
+            .set_keepalive_interval(1000)
+            .set_keepalive_timeout(2000)
             .set_resume_flag()
             .set_lease_flag()
             .set_resume_token(Bytes::from("resume token".to_string()))
