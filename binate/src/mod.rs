@@ -17,7 +17,7 @@ pub mod mimetype;
 pub mod prelude;
 
 mod error;
-pub use error::{Code, Error, Result};
-
 mod socket;
+
+pub use error::{Code, Error, Result};
 pub use socket::{Flux, Mono, RSocket};

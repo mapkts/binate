@@ -20,11 +20,13 @@ full = ["frame"]
 frame = []
 
 [dependencies]
+async-trait = "0.1.50"
 bitflags = "1.2"
 bytes = "1"
-tokio = { version = "1.8", features = [] }
-tokio-stream = "0.1.6"
 dashmap = "4.0.2"
+tokio = { version = "1.8", features = ["rt", "sync"] }
+tokio-stream = "0.1.6"
+tracing = "0.1"
 
 [target.'cfg(loom)'.dependencies]
 loom = "0.5"

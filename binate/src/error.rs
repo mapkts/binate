@@ -4,7 +4,7 @@ use std::error::Error as StdError;
 use std::fmt;
 use std::io;
 
-/// A Result type aliased for [`Result`]<T, [`Error`]>.
+/// A specialized [`Result`] for RSocket operations.
 ///
 /// [`Result`]: std::result::Result
 pub type Result<T> = std::result::Result<T, Error>;
@@ -43,7 +43,19 @@ pub(crate) enum Kind {
     Io,
 }
 
-/// A list of valid RSocket protocol error codes.
+/// Connection keepalive timed out.
+#[derive(Debug)]
+pub(crate) struct Timeout;
+
+impl fmt::Display for Timeout {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "connection keepalive timed out")
+    }
+}
+
+impl StdError for Timeout {}
+
+/// RSocket protocol error codes.
 ///
 /// See [`here`] for more information about RSocket error codes.
 ///
@@ -55,27 +67,36 @@ pub enum Code {
     /// The Setup frame is invalid for the server
     /// (it could be that the client is too recent for the old server).
     InvalidSetup       = 0x00000001,
+
     /// Some (or all) of the parameters specified by the client are unsupported by the server.
     UnsupportedSetup   = 0x00000002,
+
     /// The server rejected the setup, it can specify the reason in the payload. 
     RejectedSetup      = 0x00000003,
+
     /// The server rejected the resume, it can specify the reason in the payload.
     RejectedResume     = 0x00000004,
+
     /// The connection is being terminated. Sender or Receiver of this frame MAY close the 
     /// connection immediately without waiting for outstanding streams to terminate.
     ConnectionError    = 0x00000101,
+
     /// The connection is being terminated. Sender or Receiver of this frame MUST wait for
     /// outstanding streams to terminate before closing the connection. New requests MAY not be 
     /// accepted.
     ConnectionClose    = 0x00000102,
+
     /// Application layer logic generating a Reactive Streams onError event.
     ApplicationError   = 0x00000201,
+
     /// Despite being a valid request, the Responder decided to reject it. 
     /// The Responder guarantees that it didn't process the request.
     Rejected           = 0x00000202,
+
     /// The Responder canceled the request but may have started processing it 
     /// (similar to REJECTED but doesn't guarantee lack of side-effects).
     Canceled           = 0x00000203,
+
     /// The request is invalid.
     Invalid            = 0x00000204,
 }

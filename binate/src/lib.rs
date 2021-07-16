@@ -24,10 +24,13 @@ cfg_not_frame! {
 pub mod mimetype;
 pub mod prelude;
 
+mod consts;
 mod error;
-pub use error::{Code, Error, Result};
-
-mod rsocket;
-pub use rsocket::{Flux, Mono, RSocket};
-
 mod payload;
+mod rsocket;
+mod runtime;
+mod types;
+
+pub use self::error::{Code, Error, Result};
+pub use self::payload::{Data, Metadata, Payload, PayloadBuilder};
+pub use self::rsocket::{Flux, Mono, RSocket};

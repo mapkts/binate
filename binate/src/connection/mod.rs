@@ -2,6 +2,10 @@
 mod buf;
 
 mod conn;
-
+mod counter;
+mod socket;
 mod stream_id;
-pub use self::stream_id::StreamIdSupplier;
+
+pub use self::conn::{ConnectionStatus, DuplexConnection};
+pub use self::counter::RequestCounter;
+pub use self::stream_id::StreamIdProvider;

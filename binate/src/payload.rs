@@ -4,6 +4,7 @@
 //! the types in an application is left to the application.
 use crate::frame::Encode;
 use bytes::{Buf, BufMut, Bytes, BytesMut};
+use std::cmp;
 
 /// The data field of a `Payload`.
 pub type Data = Bytes;
@@ -104,9 +105,14 @@ impl Payload {
     ///
     /// If `mtu` does not divide the the `metadata` and `data` of the payload, then the last chunk
     /// will not have length `mtu`.
-    pub fn chunks(self, mtu: usize) -> PayloadChunks {
+    ///
+    /// # Panics
+    ///
+    /// This function panics if the given `chunk_size` is `0`.
+    pub fn chunks(self, chunk_size: usize) -> PayloadChunks {
+        assert!(chunk_size != 0);
         let (metadata, data) = self.split();
-        PayloadChunks { mtu, metadata, data }
+        PayloadChunks { chunk_size, metadata, data }
     }
 }
 
@@ -182,9 +188,30 @@ impl Encode for Payload {
 /// An iterator that yields chunked payload.
 #[derive(Debug)]
 pub struct PayloadChunks {
-    mtu: usize,
+    chunk_size: usize,
     metadata: Option<Bytes>,
     data: Option<Bytes>,
+}
+
+impl PayloadChunks {
+    /// Returns the number of chunks in this `PayloadChunks`.
+    #[inline]
+    pub fn len(&self) -> usize {
+        let metadata_len =
+            self.metadata.as_ref().map(|bytes| bytes.len()).unwrap_or(0);
+        let data_len =
+            self.data.as_ref().map(|bytes| bytes.len()).unwrap_or(0);
+        let len1 = metadata_len as f32 / self.chunk_size as f32;
+        let len2 = data_len as f32 / self.chunk_size as f32;
+
+        cmp::max(len1.ceil() as usize, len2.ceil() as usize)
+    }
+
+    /// Returns true if this `PayloadChunks` is empty.
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.len() == 0
+    }
 }
 
 impl Iterator for PayloadChunks {
@@ -199,16 +226,16 @@ impl Iterator for PayloadChunks {
         let mut data = None;
         if let Some(m) = &mut self.metadata {
             let len = m.remaining();
-            if self.mtu < len {
-                meta = Some(m.split_to(self.mtu));
+            if self.chunk_size < len {
+                meta = Some(m.split_to(self.chunk_size));
             } else {
                 meta = self.metadata.take();
             }
         }
         if let Some(d) = &mut self.data {
             let len = d.remaining();
-            if self.mtu < len {
-                data = Some(d.split_to(self.mtu));
+            if self.chunk_size < len {
+                data = Some(d.split_to(self.chunk_size));
             } else {
                 data = self.data.take();
             }
@@ -222,7 +249,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_chunks() {
+    fn smoke() {
         let payload = Payload::builder()
             .set_metadata("metadata")
             .set_data("data payload")
@@ -253,5 +280,29 @@ mod tests {
         );
         assert_eq!(iter.next(), None);
         assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn payload_chunks_len() {
+        let payload = Payload::builder().build();
+        assert_eq!(payload.chunks(1).len(), 0);
+
+        let payload = Payload::builder()
+            .set_metadata("metadata")
+            .set_data("data payload")
+            .build();
+        assert_eq!(payload.clone().chunks(13).len(), 1);
+        assert_eq!(payload.clone().chunks(12).len(), 1);
+        assert_eq!(payload.clone().chunks(11).len(), 2);
+        assert_eq!(payload.clone().chunks(10).len(), 2);
+        assert_eq!(payload.clone().chunks(9).len(), 2);
+        assert_eq!(payload.clone().chunks(8).len(), 2);
+        assert_eq!(payload.clone().chunks(7).len(), 2);
+        assert_eq!(payload.clone().chunks(6).len(), 2);
+        assert_eq!(payload.clone().chunks(5).len(), 3);
+        assert_eq!(payload.clone().chunks(4).len(), 3);
+        assert_eq!(payload.clone().chunks(3).len(), 4);
+        assert_eq!(payload.clone().chunks(2).len(), 6);
+        assert_eq!(payload.chunks(1).len(), 12);
     }
 }
