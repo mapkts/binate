@@ -263,10 +263,8 @@ impl From<io::Error> for Error {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_helpers::*;
     use std::mem;
-
-    fn assert_send<T: Send>() {}
-    fn assert_sync<T: Sync>() {}
 
     #[test]
     fn size_of() {

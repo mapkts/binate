@@ -36,9 +36,7 @@ impl RequestCounter {
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn assert_send<T: Send>() {}
-    fn assert_sync<T: Sync>() {}
+    use crate::test_helpers::*;
 
     #[test]
     fn assert_send_sync() {

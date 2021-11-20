@@ -9,7 +9,7 @@ extern crate bitflags;
 
 #[macro_use]
 #[doc(hidden)]
-pub mod macros;
+pub(crate) mod macros;
 
 pub mod connection;
 
@@ -21,15 +21,17 @@ cfg_not_frame! {
     mod frame;
 }
 
-pub mod mimetype;
-pub mod prelude;
-
 mod consts;
 mod error;
 mod payload;
 mod rsocket;
 mod runtime;
 mod types;
+
+pub(crate) mod test_helpers;
+
+pub mod mimetype;
+pub mod prelude;
 
 pub use self::error::{Code, Error, Result};
 pub use self::payload::{Data, Metadata, Payload, PayloadBuilder};
