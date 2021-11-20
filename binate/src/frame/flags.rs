@@ -159,7 +159,7 @@ bitflags! {
         /// Metadata present.
         const METADATA         = 0b00_1000_0000;
         /// More fragments follow this fragment.
-        const FOLLOWS           = 0b00_0100_0000;
+        const FOLLOWS          = 0b00_0100_0000;
         /// Client requests resume capability if possible.
         const RESUME           = 0b00_0100_0000;
         /// Respond with KEEPALIVE.
