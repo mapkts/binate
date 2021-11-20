@@ -31,7 +31,7 @@ struct RequestHanlder(Arc<RwLock<Box<dyn RSocket>>>);
 pub(crate) struct RSocketMachine {
     role: Role,
     stream_id: Arc<StreamIdProvider>,
-    connection: Arc<Box<dyn DuplexConnection>>,
+    connection: Arc<dyn DuplexConnection>,
     request_handler: RequestHanlder,
     receivers: Arc<DashMap<u32, Box<dyn Subject<Item = Frame>>>>,
     subscriptions: Arc<DashMap<u32, Box<dyn Subscription>>>,
@@ -44,7 +44,7 @@ pub(crate) struct RSocketMachine {
 impl RSocketMachine {
     pub(crate) async fn new(
         role: Role,
-        connection: Box<dyn DuplexConnection>,
+        connection: impl DuplexConnection + 'static,
         keepalive_timeout: Duration,
     ) -> RSocketMachine {
         let stream_id = match role {
