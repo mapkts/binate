@@ -23,11 +23,13 @@ pub mod connection;
 pub mod mimetype;
 pub mod prelude;
 
-cfg_frame! {
+cfg! {
+    #[feature = "frame"]
     pub mod frame;
 }
 
-cfg_not_frame! {
+cfg_not! {
+    #[feature = "frame"]
     mod frame;
 }
 

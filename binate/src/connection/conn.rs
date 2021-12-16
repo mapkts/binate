@@ -12,7 +12,7 @@ pub trait DuplexConnection: Send + Sync {
     /// Do nothing if the underlying connection is closed.
     fn send(&self, frame: Frame) -> Mono<Result<()>>;
 
-    /// Similar to [`send`], but doesn't wait for response.
+    /// Similar to `send`, but doesn't wait for response.
     fn send_and_forget(&self, frame: Frame) -> Result<()>;
 
     /// Send a stream of frames to the remote peer.

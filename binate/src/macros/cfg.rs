@@ -1,6 +1,6 @@
-macro_rules! feature {
+macro_rules! cfg {
     (
-        #![$meta:meta]
+        #[$meta:meta]
         $($item:item)*
     ) => {
         $(
@@ -11,38 +11,13 @@ macro_rules! feature {
     }
 }
 
-macro_rules! cfg_loom {
-    ($($item:item)*) => {
+macro_rules! cfg_not {
+    (
+        #[$meta:meta]
+        $($item:item)*
+    ) => {
         $(
-            #[cfg(loom)]
-            $item
-        )*
-    }
-}
-
-macro_rules! cfg_not_loom {
-    ($($item:item)*) => {
-        $(
-            #[cfg(not(loom))]
-            $item
-        )*
-    }
-}
-
-macro_rules! cfg_frame {
-    ($($item:item)*) => {
-        $(
-            #[cfg(feature = "frame")]
-            #[cfg_attr(docsrs, doc(cfg(feature = "frame")))]
-            $item
-        )*
-    }
-}
-
-macro_rules! cfg_not_frame {
-    ($($item:item)*) => {
-        $(
-            #[cfg(not(feature = "frame"))]
+            #[cfg(not($meta))]
             $item
         )*
     }

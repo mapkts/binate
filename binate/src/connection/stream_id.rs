@@ -1,10 +1,12 @@
 use dashmap::DashMap;
 
-cfg_not_loom! {
+cfg_not! {
+    #[loom]
     use std::sync::atomic::{AtomicI32, Ordering};
 }
 
-cfg_loom! {
+cfg! {
+    #[loom]
     use loom::sync::atomic::{AtomicI32, Ordering};
 }
 
