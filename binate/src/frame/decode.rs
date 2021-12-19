@@ -34,7 +34,7 @@ pub enum DecodeError {
 }
 
 impl fmt::Display for DecodeError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         use DecodeError::*;
         match self {
             InComplete => write!(f, "incomplete frame"),

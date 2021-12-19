@@ -48,7 +48,7 @@ pub(crate) enum Kind {
 pub(crate) struct Timeout;
 
 impl fmt::Display for Timeout {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "connection keepalive timed out")
     }
 }
@@ -221,7 +221,7 @@ impl Error {
 }
 
 impl fmt::Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let Some(ref source) = self.inner.source {
             write!(f, "{}: {}", self.description(), source)
         } else {

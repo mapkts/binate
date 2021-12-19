@@ -1,8 +1,12 @@
 //! Implementation of the RSocket protocol.
-#![warn(missing_docs)]
-#![warn(missing_debug_implementations)]
-#![allow(dead_code)]
+#![warn(
+    rust_2018_idioms,
+    missing_docs,
+    missing_debug_implementations,
+    rustdoc::broken_intra_doc_links
+)]
 #![cfg_attr(docsrs, feature(doc_cfg))]
+#![allow(dead_code)]
 
 #[macro_use]
 extern crate bitflags;
@@ -23,7 +27,7 @@ pub mod connection;
 pub mod mimetype;
 pub mod prelude;
 
-cfg! {
+cfg_doc! {
     #[feature = "frame"]
     pub mod frame;
 }

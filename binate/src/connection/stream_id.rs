@@ -1,14 +1,10 @@
 use dashmap::DashMap;
 
-cfg_not! {
-    #[loom]
-    use std::sync::atomic::{AtomicI32, Ordering};
-}
+#[cfg(not(loom))]
+use std::sync::atomic::{AtomicI32, Ordering};
 
-cfg! {
-    #[loom]
-    use loom::sync::atomic::{AtomicI32, Ordering};
-}
+#[cfg(loom)]
+use loom::sync::atomic::{AtomicI32, Ordering};
 
 const STREAM_ID_MASK: i32 = 0x7FFFFFFF;
 

@@ -1,4 +1,4 @@
-macro_rules! cfg {
+macro_rules! cfg_doc {
     (
         #[$meta:meta]
         $($item:item)*
