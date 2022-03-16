@@ -1,0 +1,1 @@
+initSidebarItems({"enum":[["ConnectionStatus","Describes connection status."]],"struct":[["RequestCounter","Atomic counter for counting request permits."],["StreamIdProvider","Thread safe stream ID provider."]],"trait":[["DuplexConnection","Represents a network connection over `RSocket` to send/receive data."]]});

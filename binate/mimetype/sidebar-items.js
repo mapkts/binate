@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["DEFAULT_MIMETYPE","Default mimetype for encoding metadata and data."]],"enum":[["WellKnownMimeType","Well-known MIME types."]]});

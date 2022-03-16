@@ -1,0 +1,3 @@
+var N = null;var sourcesIndex = {};
+sourcesIndex["binate"] = {"name":"","dirs":[{"name":"connection","files":["buf.rs","conn.rs","counter.rs","mod.rs","socket.rs","stream_id.rs"]},{"name":"frame","dirs":[{"name":"codec","files":["cancel.rs","error.rs","keepalive.rs","lease.rs","metadata_push.rs","mod.rs","payload.rs","request_channel.rs","request_fnf.rs","request_n.rs","request_response.rs","request_stream.rs","resume.rs","resume_ok.rs","setup.rs"]}],"files":["decode.rs","encode.rs","flags.rs","mod.rs","u24.rs","version.rs","visit.rs"]},{"name":"macros","files":["cfg.rs","mod.rs"]}],"files":["consts.rs","error.rs","lib.rs","mimetype.rs","payload.rs","prelude.rs","rsocket.rs","runtime.rs","test_helpers.rs","types.rs"]};
+createSourceSidebar();
