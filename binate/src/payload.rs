@@ -4,7 +4,8 @@
 //! the types in an application is left to the application.
 use crate::frame::Encode;
 use bytes::{Buf, BufMut, Bytes, BytesMut};
-use std::cmp;
+use std::str::Utf8Error;
+use std::{cmp, iter};
 
 /// The data field of a `Payload`.
 pub type Data = Bytes;
@@ -68,20 +69,20 @@ impl Payload {
     }
 
     /// Returns the `data` part of this payload in UTF-8 format, if the `data` is valid UTF-8.
-    pub fn data_utf8(&self) -> Option<&str> {
+    pub fn data_utf8(&self) -> Result<&str, Utf8Error> {
         if let Some(ref data) = self.data {
-            std::str::from_utf8(data).ok()
+            std::str::from_utf8(data)
         } else {
-            None
+            Ok("")
         }
     }
 
     /// Returns the `metadata` part of this payload in UTF-8 format, if the `metadata` is valid UTF-8.
-    pub fn metadata_utf8(&self) -> Option<&str> {
+    pub fn metadata_utf8(&self) -> Result<&str, Utf8Error> {
         if let Some(ref metadata) = self.metadata {
-            std::str::from_utf8(metadata).ok()
+            std::str::from_utf8(metadata)
         } else {
-            None
+            Ok("")
         }
     }
 
@@ -193,10 +194,10 @@ pub struct PayloadChunks {
     data: Option<Bytes>,
 }
 
-impl PayloadChunks {
+impl ExactSizeIterator for PayloadChunks {
     /// Returns the number of chunks in this `PayloadChunks`.
     #[inline]
-    pub fn len(&self) -> usize {
+    fn len(&self) -> usize {
         let metadata_len =
             self.metadata.as_ref().map(|bytes| bytes.len()).unwrap_or(0);
         let data_len =
@@ -205,12 +206,6 @@ impl PayloadChunks {
         let len2 = data_len as f32 / self.chunk_size as f32;
 
         cmp::max(len1.ceil() as usize, len2.ceil() as usize)
-    }
-
-    /// Returns true if this `PayloadChunks` is empty.
-    #[inline]
-    pub fn is_empty(&self) -> bool {
-        self.len() == 0
     }
 }
 
@@ -243,6 +238,8 @@ impl Iterator for PayloadChunks {
         Some(Payload::new(meta, data))
     }
 }
+
+impl iter::FusedIterator for PayloadChunks {}
 
 #[cfg(test)]
 mod tests {

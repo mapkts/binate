@@ -2,7 +2,7 @@
 name = "binate"
 version = "0.0.1"
 authors = ["Aaron Taner <mapkts@gmail.com>"]
-description = "WIP"
+description = "RSocket protocol built on top of Tokio and Tower."
 license = "MIT OR Apache-2.0"
 documentation = "https://docs.rs/binate"
 homepage = "https://github.com/mapkts/binate"

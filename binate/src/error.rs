@@ -232,7 +232,7 @@ impl fmt::Display for Error {
 
 impl fmt::Debug for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut f = f.debug_tuple("nightwatch_rsocket::Error");
+        let mut f = f.debug_tuple("binate::Error");
         f.field(&self.inner.kind);
         if let Some(ref source) = self.inner.source {
             f.field(source);
